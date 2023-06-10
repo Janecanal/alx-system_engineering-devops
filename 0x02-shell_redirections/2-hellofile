@@ -1,2 +1,2 @@
 #!/bin/bash
-oat /etc/passwd
+cat /etc/passwd
