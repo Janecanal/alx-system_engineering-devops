@@ -33,13 +33,19 @@ defaults
 	errorfile 503 /etc/haproxy/errors/503.http
 	errorfile 504 /etc/haproxy/errors/504.http
 
-frontend myfrontend
-	bind *:80
-	bind *:443 ssl crt /etc/haproxy/certs/www.janecanal.tech.pem
-	http-request redirect scheme https code 301 if { hdr(Host) -i www.janecanal.tech } !{ ssl_fc }
-	default_backend myservers
+frontend janecanal-frontend
+        bind *:80
+        mode http
+        http-request redirect scheme https code 301 unless { ssl_fc }
+        http-request set-header X_Forwarded-Proto http
+        default_backend janecanal-backend
 
-backend myservers
-	balance roundrobin
-	server 415055 web-01 54.90.54.40:80 check
-	server 415055 web-02 34.207.211.203:80 check	i
+frontend janecanal-frontend-https
+        bind *:443 ssl crt /etc/haproxy/certs/www.janecanal.tech.pem
+        http-request set-header X-Forwarded-Proto https
+        default_backend janecanal-backend
+
+backend janecanal-backend
+        balance roundrobin
+        server 415055-web-01 54.90.54.40:80 check
+        server 415055-web-02 34.207.211.203:80 check
